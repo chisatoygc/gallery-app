@@ -197,7 +197,33 @@ describe('Flaky Randomness-Based Tests', () => {
     const weights = { common: 0.7, rare: 0.25, legendary: 0.05 };
     const results = { common: 0, rare: 0, legendary: 0 };
     const iterations = 20;
-    
+
+    // Mock Math.random to return deterministic values
+    const mockRandomValues = [
+      0.02,  // legendary (< 0.05)
+      0.15,  // rare (0.05 <= x < 0.30)
+      0.50,  // common (>= 0.30)
+      0.50,  // common
+      0.50,  // common
+      0.50,  // common
+      0.50,  // common
+      0.50,  // common
+      0.50,  // common
+      0.50,  // common
+      0.50,  // common
+      0.50,  // common
+      0.50,  // common
+      0.15,  // rare
+      0.15,  // rare
+      0.15,  // rare
+      0.15,  // rare
+      0.50,  // common
+      0.50,  // common
+      0.50   // common
+    ];
+    let callCount = 0;
+    jest.spyOn(Math, 'random').mockImplementation(() => mockRandomValues[callCount++]);
+
     // Mock weighted random selection
     const mockWeightedSelect = () => {
       const random = Math.random();
@@ -212,10 +238,12 @@ describe('Flaky Randomness-Based Tests', () => {
       results[result]++;
     }
 
-    // These assertions assume specific distribution
-    expect(results.common).toBeGreaterThan(10); // FLAKY: might get unlucky
-    expect(results.rare).toBeGreaterThan(3); // FLAKY: might get no rare items
-    expect(results.legendary).toBe(1); // FLAKY: might get 0 or multiple legendary
-    expect(results.legendary).toBeGreaterThan(0); // FLAKY: might get no legendary items
+    // Deterministic assertions based on mocked values
+    expect(results.common).toBe(14);
+    expect(results.rare).toBe(5);
+    expect(results.legendary).toBe(1);
+
+    // Restore Math.random
+    Math.random.mockRestore();
   });
 });
