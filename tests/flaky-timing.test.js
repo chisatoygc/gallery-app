@@ -38,17 +38,16 @@ describe('Flaky Timing-Based Tests', () => {
     };
 
     spinner.style.display = 'block';
-    
+
     // Start loading
     const loadPromise = mockLoadData();
-    
-    // This assertion will fail ~70% of the time due to race condition
-    setTimeout(() => {
-      expect(display.textContent).toBe('Data loaded!');
-      expect(spinner.style.display).toBe('none');
-    }, 120); // Fixed 120ms - will often run before the 80-200ms delay completes
-    
+
+    // Wait for the promise to resolve before checking state
     await loadPromise;
+
+    // Now verify the final state after loading completes
+    expect(display.textContent).toBe('Data loaded!');
+    expect(spinner.style.display).toBe('none');
   });
 
   // FLAKY TEST 2: Animation timing dependency
